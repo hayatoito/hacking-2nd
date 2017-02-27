@@ -19,7 +19,8 @@ int main(int argc, char *argv[]) {
 
    buffer = (char *) ec_malloc(100);
    datafile = (char *) ec_malloc(20);
-   strcpy(datafile, "/var/notes");
+   // strcpy(datafile, "/var/notes");
+   strcpy(datafile, "/tmp/notes");
 
    if(argc < 2)                // If there aren't commandline arguments
       usage(argv[0], datafile); // display usage message and exit

@@ -4,7 +4,12 @@
 #include <sys/stat.h>
 #include "hacking.h"
 
-#define FILENAME "/var/notes"
+// See http://stackoverflow.com/questions/10966218/why-does-a-file-read-after-calling-lseek-always-return-0
+// Without this include, lseek's 2nd parameter will be a huge positive value, instead
+// of a negative value
+#include <unistd.h>
+
+#define FILENAME "/tmp/notes"
 
 int print_notes(int, int, char *);   // note printing function
 int find_user_note(int, int);        // seek in file for a note for user
@@ -37,14 +42,14 @@ int main(int argc, char *argv[]) {
 int print_notes(int fd, int uid, char *searchstring) {
 	int note_length;
 	char byte=0, note_buffer[100];
-	
+
 	note_length = find_user_note(fd, uid);
 	if(note_length == -1)  // if end of file reached
 		return 0;           //   return 0
 
 	read(fd, note_buffer, note_length); // read note data
-	note_buffer[note_length] = 0;       // terminate the string
-	
+  	note_buffer[note_length] = 0;       // terminate the string
+
 	if(search_note(note_buffer, searchstring)) // if searchstring found
 		printf(note_buffer);                    //   print the note
 	return 1;
@@ -68,9 +73,10 @@ int find_user_note(int fd, int user_uid) {
 		while(byte != '\n') {  // figure out how many bytes to the end of line
 			if(read(fd, &byte, 1) != 1) // read a single byte
 				return -1;     // if byte isn't read, return end of file code
-			length++;  
+			length++;
 		}
 	}
+        printf("sizeof(off_t): %ld\n", sizeof(off_t));
 	lseek(fd, length * -1, SEEK_CUR); // rewind file reading by length bytes
 
 	printf("[DEBUG] found a %d byte note for user id %d\n", length, note_uid);
@@ -85,7 +91,7 @@ int search_note(char *note, char *keyword) {
 	keyword_length = strlen(keyword);
 	if(keyword_length == 0)  // if there is no search string
 		return 1;              // always "match"
-	
+
 	for(i=0; i < strlen(note); i++) { // iterate over bytes in note
 		if(note[i] == keyword[match])  // if byte matches keyword
 			match++;   // get ready to check the next byte
@@ -100,4 +106,3 @@ int search_note(char *note, char *keyword) {
 	}
 	return 0;  // return not matched
 }
-

@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
    printf("[DEBUG] datafile @ %p: \'%s\'\n", datafile, datafile);
 
    strncat(buffer, "\n", 1); // add a newline on the end
-	  
+
 // Opening the file
    fd = open(datafile, O_WRONLY|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
    if(fd == -1)
